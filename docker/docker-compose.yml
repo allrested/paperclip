@@ -2,28 +2,28 @@ services:
   db:
     image: postgres:17-alpine
     environment:
-      POSTGRES_USER: paperclip
-      POSTGRES_PASSWORD: paperclip
-      POSTGRES_DB: paperclip
+      POSTGRES_USER: "${DB_USER:-bandung}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD:-bandung}"
+      POSTGRES_DB: "${DB_NAME:-paperclip}"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U paperclip -d paperclip"]
       interval: 2s
       timeout: 5s
       retries: 30
     ports:
-      - "5432:5432"
+      - "${DB_PORT:-8989}:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - ${DB_PATH:-./data}:/var/lib/postgresql/data
 
   server:
     build:
       context: ..
       dockerfile: Dockerfile
     ports:
-      - "3100:3100"
+      - "${PAPERCLIP_PORT:-3100}:3100"
     environment:
-      DATABASE_URL: postgres://paperclip:paperclip@db:5432/paperclip
-      PORT: "3100"
+      DATABASE_URL: "${DATABASE_URL:-postgres://bandung:bandung@db:5432/paperclip}"
+      PORT: "${PAPERCLIP_PORT:-3100}"
       SERVE_UI: "true"
       PAPERCLIP_DEPLOYMENT_MODE: "authenticated"
       PAPERCLIP_DEPLOYMENT_EXPOSURE: "private"
@@ -37,5 +37,4 @@ services:
         condition: service_healthy
 
 volumes:
-  pgdata:
   paperclip-data:
